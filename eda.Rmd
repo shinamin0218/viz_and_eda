@@ -124,4 +124,37 @@ weather_df %>%
 ```
 
 
+## A digression on 2x2 tables
+
+```{r}
+weather_df %>%
+  filter(name !="Molokai_HI") %>%
+  mutate(
+    cold = case_when(
+      tmax < 5 ~ "cold",
+      tmax >= 5 ~ "not cold",
+      TRUE      ~ ""     
+      )
+  ) %>% 
+  group_by(name, cold) %>% 
+  summarize(count = n())
+```
+
+```{r}
+weather_df %>%
+  filter(name !="Molokai_HI") %>%
+  mutate(
+    cold = case_when(
+      tmax < 5 ~ "cold",
+      tmax >= 5 ~ "not cold",
+      TRUE      ~ ""     
+      )
+  ) %>%
+  janitor::tabyl(name, cold)
+```
+
+
+
+
+
 
