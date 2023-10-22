@@ -443,3 +443,65 @@ weather_df %>%
 | 2023-07-01 |           30.2 |       30.0 |         16.3 |
 | 2023-08-01 |           27.6 |       30.6 |         17.5 |
 | 2023-09-01 |           24.3 |       30.9 |         12.0 |
+
+## `group_by` and `mutate`
+
+``` r
+weather_df %>%
+  group_by(name) %>% 
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    centered_tmax = tmax - mean_tmax
+  ) %>%
+  ggplot(aes(x = date, y = centered_tmax, color = name)) +
+  geom_point()
+```
+
+    ## Warning: Removed 18 rows containing missing values (`geom_point()`).
+
+![](eda_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+what about window functions?
+
+Ranking…
+
+``` r
+weather_df %>%
+  group_by(name, month) %>%
+  mutate(temp_rank = min_rank(tmax))
+```
+
+    ## # A tibble: 3,009 × 8
+    ## # Groups:   name, month [99]
+    ##    name           id          date        prcp  tmax  tmin month      temp_rank
+    ##    <chr>          <chr>       <date>     <dbl> <dbl> <dbl> <date>         <int>
+    ##  1 CentralPark_NY USW00094728 2021-01-01   157   4.4   0.6 2021-01-01        14
+    ##  2 CentralPark_NY USW00094728 2021-01-02    13  10.6   2.2 2021-01-01        31
+    ##  3 CentralPark_NY USW00094728 2021-01-03    56   3.3   1.1 2021-01-01        13
+    ##  4 CentralPark_NY USW00094728 2021-01-04     5   6.1   1.7 2021-01-01        20
+    ##  5 CentralPark_NY USW00094728 2021-01-05     0   5.6   2.2 2021-01-01        19
+    ##  6 CentralPark_NY USW00094728 2021-01-06     0   5     1.1 2021-01-01        16
+    ##  7 CentralPark_NY USW00094728 2021-01-07     0   5    -1   2021-01-01        16
+    ##  8 CentralPark_NY USW00094728 2021-01-08     0   2.8  -2.7 2021-01-01         8
+    ##  9 CentralPark_NY USW00094728 2021-01-09     0   2.8  -4.3 2021-01-01         8
+    ## 10 CentralPark_NY USW00094728 2021-01-10     0   5    -1.6 2021-01-01        16
+    ## # ℹ 2,999 more rows
+
+Lag
+
+``` r
+weather_df %>%
+  group_by(name) %>%
+  mutate(temp_change = tmax - lag(tmax)) %>%
+  summarize(
+    temp_change_max = max(temp_change, na.rm = TRUE),
+    temp_change_sd = sd(temp_change, na.rm = TRUE)
+  )
+```
+
+    ## # A tibble: 3 × 3
+    ##   name           temp_change_max temp_change_sd
+    ##   <chr>                    <dbl>          <dbl>
+    ## 1 CentralPark_NY            12.8           4.29
+    ## 2 Molokai_HI                 6.1           1.24
+    ## 3 Waterhole_WA              11.1           3.02
